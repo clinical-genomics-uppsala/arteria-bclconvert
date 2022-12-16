@@ -87,8 +87,7 @@ class Samplesheet:
                                                     "Read2UMIStartFromCycle," in x[1] or
                                                     "Read1UMILength," in x[1] or
                                                     "Read2UMILength," in x[1], enumurated_lines))
-            assert len(lines_with_obsolete_settings) == 0, "SampleSheet contain obsolete settings {lines_with_obsolete_settings}"
-            enumurated_lines.seek(0)
+            assert len(lines_with_obsolete_settings) == 0, f"SampleSheet contain obsolete settings {lines_with_obsolete_settings}"
             lines_with_data = list(filter(lambda x: "[Data]" in x[1] or "[data]" in x[1] or "[BCLConvert_Data]" in x[1], enumurated_lines))
             assert len(lines_with_data) == 1, "There wasn't strictly one line in samplesheet with line '[Data]'"
             return lines_with_data[0][0]
