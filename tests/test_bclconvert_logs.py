@@ -4,7 +4,8 @@
 import unittest
 from mock import MagicMock, patch, mock_open
 
-from bclconvert.lib.bcl2fastq_logs import BclConvertLogFileProvider
+from bclconvert.lib.bclconvert_logs import BclConvertLogFileProvider
+
 
 class TestBclConvertLogFileProvider(unittest.TestCase):
 
@@ -19,14 +20,14 @@ class TestBclConvertLogFileProvider(unittest.TestCase):
     mock_config.__getitem__.return_value = fake_path
     runfolder = "160218_ST-E00215_0070_BHKGLFCCXX"
 
-    log_filer_provider = Bcl2FastqLogFileProvider(mock_config)
+    log_filer_provider = BclConvertLogFileProvider(mock_config)
 
     def test_log_file_path(self):
         log_file = self.log_filer_provider.log_file_path(self.runfolder)
         self.assertEqual(log_file, "{}/{}.log".format(self.fake_path, self.runfolder))
 
     def test_get_log_for_runfolder(self):
-        with patch("__builtin__.open", mock_open(read_data=self.fake_file_content), create=True):
+        with patch("builtins.open", mock_open(read_data=self.fake_file_content), create=True):
             file_content = self.log_filer_provider.get_log_for_runfolder(self.runfolder)
             self.assertEqual(file_content, self.fake_file_content)
 

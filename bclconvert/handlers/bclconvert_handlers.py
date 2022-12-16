@@ -79,6 +79,7 @@ class VersionsHandler(BaseBclConvertHandler):
         available_versions = self.config["bclconvert"]["versions"]
         self.write_object(available_versions)
 
+
 class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
     """
     Start bclconvert
@@ -111,15 +112,15 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         use_base_mask = ""
         bcl_only_lane = None
         create_indexes = False
-        bclconvert_bcl_num_parallel_tiles = None
-        bclconvert_bcl_num_conversion_threads = None
-        bclconvert_bcl_num_compression_threads = None
-        bclconvert_bcl_num_decompression_threads = None
+        bcl_num_parallel_tiles = None
+        bcl_num_conversion_threads = None
+        bcl_num_compression_threads = None
+        bcl_num_decompression_threads = None
         additional_args = ""
 
         runfolder_base_path = self.config["runfolder_path"]
         runfolder_input = os.path.join(runfolder_base_path, runfolder)
-
+        
         if not os.path.isdir(runfolder_input):
             raise ArteriaUsageException(f"No such file: {runfolder_input}")
 
@@ -151,17 +152,17 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         if "bcl_only_lane" in request_data:
             bcl_only_lane = request_data['bcl_only_lane']
 
-        if "bclconvert_bcl_num_parallel_tiles" in request_data:
-            bclconvert_bcl_num_parallel_tiles = request_data['bclconvert_bcl_num_parallel_tiles']
+        if "bcl_num_parallel_tiles" in request_data:
+            bcl_num_parallel_tiles = request_data['bcl_num_parallel_tiles']
 
-        if "bclconvert_bcl_num_conversion_threads" in request_data:
-            bclconvert_bcl_num_conversion_threads = request_data["bclconvert_bcl_num_conversion_threads"]
+        if "bcl_num_conversion_threads" in request_data:
+            bcl_num_conversion_threads = request_data["bcl_num_conversion_threads"]
 
-        if "bclconvert_bcl_num_compression_threads" in request_data:
-            bclconvert_bcl_num_compression_threads = request_data["bclconvert_bcl_num_compression_threads"]
+        if "bcl_num_compression_threads" in request_data:
+            bcl_num_compression_threads = request_data["bcl_num_compression_threads"]
 
-        if "bclconvert_bcl_num_decompression_threads" in request_data:
-            bclconvert_bcl_num_decompression_threads = request_data["bclconvert_bcl_num_decompression_threads"]
+        if "bcl_num_decompression_threads" in request_data:
+            bcl_num_decompression_threads = request_data["bcl_num_decompression_threads"]
 
         if "additional_args" in request_data:
             additional_args = request_data["additional_args"]
@@ -177,10 +178,10 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
             exclude_tiles=exclude_tiles,
             use_base_mask=use_base_mask,
             create_indexes=create_indexes,
-            bclconvert_bcl_num_parallel_tiles=bclconvert_bcl_num_parallel_tiles,
-            bclconvert_bcl_num_conversion_threads=bclconvert_bcl_num_conversion_threads,
-            bclconvert_bcl_num_compression_threads=bclconvert_bcl_num_compression_threads,
-            bclconvert_bcl_num_decompression_threads=bclconvert_bcl_num_decompression_threads,
+            bcl_num_parallel_tiles=bcl_num_parallel_tiles,
+            bcl_num_conversion_threads=bcl_num_conversion_threads,
+            bcl_num_compression_threads=bcl_num_compression_threads,
+            bcl_num_decompression_threads=bcl_num_decompression_threads,
             additional_args=additional_args)
 
         return config
@@ -262,7 +263,7 @@ class StatusHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         else:
             all_status = self.runner_service().status_all()
             status_dict = {}
-            for k,v in all_status.iteritems():
+            for k,v in all_status.items():
                 status_dict[k] = {"state": v}
             status = status_dict
 
@@ -293,7 +294,7 @@ class StopHandler(BaseBclConvertHandler, BclConvertServiceMixin):
                 ArteriaUsageException("Unknown job to stop")
         except ArteriaUsageException as e:
             log.warning(f"Failed stopping job: {job_id}. Message: {e}")
-            self.send_error(500, reason=str(e())
+            self.send_error(500, reason=str(e))
 
 
 class BclConvertLogHandler(BaseBclConvertHandler):
