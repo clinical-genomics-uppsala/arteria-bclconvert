@@ -64,7 +64,7 @@ class BclConvertConfig:
 
         self.general_config = general_config
 
-        self.runfolder_input = runfolder_input        
+        self.runfolder_input = runfolder_input
 
         if not samplesheet:
             self.samplesheet_file = runfolder_input + "/SampleSheet.csv"
@@ -452,6 +452,8 @@ class BclConvertRunner(BaseBclConvertRunner):
             "--output-directory", self.config.output,
             "--force" # overwrite output if it exists.
         ]
+
+        samplesheet = Samplesheet(self.config.samplesheet_file)
 
         if self.config.barcode_mismatches:
             commandline_collection.append("--mismatches " + self.config.barcode_mismatches)
