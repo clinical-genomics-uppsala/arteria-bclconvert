@@ -141,7 +141,6 @@ class BclConvertConfig:
         if self.nbr_of_cores < threads_requested:
             logging.warning(f"bcl-convert will use {threads_requested} threads, {self.nbr_of_cores} exist!")
 
-
     @staticmethod
     def copy_old_samplesheet(new_samplesheet_file):
         new_path_for_old_samplesheet = new_samplesheet_file + time.strftime("%Y%m%d-%H%M%S")
@@ -244,7 +243,7 @@ class BclConvertConfig:
 
             if not difference >= 0:
                 raise ArteriaUsageException("Sample sheet indicates that index is "
-                                       "longer than what was read by the sequencer!")
+                                            "longer than what was read by the sequencer!")
 
             if length_of_index_in_samplesheet == 0:
                 # If there is no index in the samplesheet, ignore it in the base-mask
@@ -409,9 +408,9 @@ class BaseBclConvertRunner(object):
 
         try:
             log.debug(f"Create symlink from {link_path} to {link_target_path}.")
-            os.symlink(link_target_path, link_path)
+            os.symlink(link_target_path, link_path, target_is_directory=True)
         except OSError as e:
-            if e.errno == os.errno.EEXIST:
+            if e.errno == errno.EEXIST:
                 log.warning(f"Symlink from {link_path} to {link_target_path} already exits, will remove it and recreate it...")
                 log.warning(f"Removing link: {link_path}")
                 os.remove(link_path)
@@ -419,7 +418,6 @@ class BaseBclConvertRunner(object):
             else:
                 log.error(f"Problem creating symlink from {link_path} to {link_target_path}. Message: {e.message}")
                 raise e
-
 
 
 class BclConvertRunner(BaseBclConvertRunner):
@@ -446,59 +444,51 @@ class BclConvertRunner(BaseBclConvertRunner):
 
         # Assumes configureBclToFastq.pl on path
         commandline_collection = [
-            "bcl-convert",
-            "--bcl-input-directory", self.config.runfolder_input,
+            self.binary,
+            "--bcl-inputdirectory", self.config.runfolder_input,
             "--sample-sheet", self.config.samplesheet_file,
             "--output-directory", self.config.output,
-            "--force" # overwrite output if it exists.
+            "--force"  # overwrite output if it exists.
         ]
 
         samplesheet = Samplesheet(self.config.samplesheet_file)
 
         if self.config.barcode_mismatches:
-            commandline_collection.append("--mismatches " + self.config.barcode_mismatches)
+            commandline_collection.extend(["--mismatches", self.config.barcode_mismatches])
 
         if self.config.tiles:
-            commandline_collection.append("--tiles " + self.config.tiles)
+            commandline_collection.extend(["--tiles", self.config.tiles])
 
         if self.config.exclude_tiles:
-            commandline_collection.append("--exclude-tiles " + self.config.exclude_tiles)
+            commandline_collection.extend(["--exclude-tiles", self.config.exclude_tiles])
 
         if self.config.bcl_sampleproject_subdirectories:
-             commandline_collection.append(f"--bcl-sampleproject-subdirectories {self.config.bcl_sampleproject_subdirectories}")
+            commandline_collection.extend(["--bcl-sampleproject-subdirectories", f"{self.config.bcl_sampleproject_subdirectories}"])
 
         if self.config.sample_name_column_enabled:
-             commandline_collection.append(f"--sample-name-column-enabled {self.config.sample_name_column_enabled}")
+            commandline_collection.extend(["--sample-name-column-enabled", f"{self.config.sample_name_column_enabled}"])
 
         if self.config.strict_mode:
-            commandline_collection.append("--strict-mode true")
+            commandline_collection.extend(["--strict-mode", "true"])
         else:
-            commandline_collection.append("--strict-mode false")
+            commandline_collection.extend(["--strict-mode", "false"])
 
         if self.config.fastq_gzip_compression_level:
-            commandline_collection.append(f"--fastq-gzip-compression-level {self.fastq_gzip_compression_level}")
+            commandline_collection.extend(["--fastq-gzip-compression-level", f"{self.config.fastq_gzip_compression_level}"])
 
         if self.config.no_lane_splitting:
-            commandline_collection.append("--no-lane-splitting true")
+            commandline_collection.extend(["--no-lane-splitting", "true"])
         else:
-            commandline_collection.append("--no-lane-splitting false")
+            commandline_collection.extend(["--no-lane-splitting", "false"])
 
-        commandline_collection.append(f"--num-unknown-barcodes-reported {self.config.num_unknown_barcodes_reported}")
+        commandline_collection.extend(["--bcl-num-parallel-tiles", f"{self.config.bcl_num_parallel_tiles}"])
 
-        if self.config.output_legacy_stats:
-            commandline_collection.append("--output-legacy-stats true")
-        else:
-            commandline_collection.append("--output-legacy-stats false")
-
-        commandline_collection.append(f"--bcl-num-parallel-tiles {self.config.bcl_num_parallel_tiles}")
-
-        commandline_collection.append(f"--bcl-num-conversion-threads {self.config.bcl_num_conversion_threads}")
-        commandline_collection.append(f"--bcl-num-compression-threads {self.config.bcl_num_compression_threads}")
-        commandline_collection.append(f"--bcl-num-decompression-threads {self.config.bcl_num_decompression_threads}")
+        commandline_collection.extend(["--bcl-num-conversion-threads", f"{self.config.bcl_num_conversion_threads}"])
+        commandline_collection.extend(["--bcl-num-compression-threads", f"{self.config.bcl_num_compression_threads}"])
+        commandline_collection.extend(["--bcl-num-decompression-threads", f"{self.config.bcl_num_decompression_threads}"])
 
         if self.config.additional_args:
-            commandline_collection.append(self.config.additional_args)
+            commandline_collection.extend(self.config.additional_args)
 
-        command = " ".join(commandline_collection)
-        log.debug("Generated command: " + command)
-        return command
+        log.debug("command: " + str(commandline_collection))
+        return commandline_collection
