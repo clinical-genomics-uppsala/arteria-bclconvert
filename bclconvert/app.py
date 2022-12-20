@@ -21,6 +21,7 @@ def routes(**kwargs):
         url(r"/api/1.0/logs/([\w_-]+)", BclConvertLogHandler, name="logs", kwargs=kwargs)
     ]
 
+
 def start():
     """
     Start the bclconvert-ws app
