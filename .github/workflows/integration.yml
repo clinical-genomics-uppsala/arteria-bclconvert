@@ -40,6 +40,8 @@ jobs:
       - name: run container
         run: >
           docker run -d -p 8888:8888 -v ${PWD}/tests/runfolders:/runfolders:rw -v ${PWD}/fastq:/fastq:rw -v ${PWD}/logs:/bclconvert_logs test_container:latest sh -c 'bclconvert-ws --debug --config config/ --port 8888'
+      - name: sleep 5
+        run: sleep 5
       - name: start processing
         run: >
           curl -X POST --data '{"additional_args": ""}' http://127.0.0.1:8888/api/1.0/start/runfolder1
