@@ -1,6 +1,6 @@
 FROM python:3.9
 
-ARG VERSION=dev
+ARG VERSION=develop
 
 RUN apt update && apt install git && git clone -b $VERSION https://github.com/clinical-genomics-uppsala/arteria-bclconvert.git
 
