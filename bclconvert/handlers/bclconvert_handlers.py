@@ -117,8 +117,10 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         bcl_num_decompression_threads = None
         additional_args = ""
 
-        runfolder_base_path = self.config["runfolder_path"]
-        runfolder_input = os.path.join(runfolder_base_path, runfolder)
+        for runfolders_path in self.config["runfolder_path"]:
+            if os.path.isdir(os.path.join(runfolders_path, runfolder_input)):
+                runfolder_input = os.path.join(runfolders_path, runfolder)
+                break
 
         if not os.path.isdir(runfolder_input):
             raise ArteriaUsageException(f"No such file: {runfolder_input}")
