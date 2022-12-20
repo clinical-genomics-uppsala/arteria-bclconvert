@@ -43,10 +43,10 @@ jobs:
       - name: start processing
         run: >
           curl -X POST --data '{"additional_args": ""}' http://127.0.0.1:8888/api/1.0/start/runfolder1
-      - name: check status:
+      - name: check status
         run: >
           curl http://127.0.0.1:8888/api/1.0/status/1
-      - name: sleep:
+      - name: sleep
         run: sleep 15
       - name: check that status is done
         run: >
