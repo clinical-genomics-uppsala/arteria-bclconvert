@@ -10,10 +10,6 @@ on:
     branches:
      - main
      - develop
-  pull_request:
-    branches:
-      - main
-      - develop
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -34,7 +30,7 @@ jobs:
           python-version: 3.8
       - name: build docker container
         run: >
-          docker  build ./docker -f ./docker/dummy_service.Dockerfile  -t test_container:latest
+          docker  build --build-arg VERSION=${GITHUB_REF##*/} ./docker -f ./docker/dummy_service.Dockerfile  -t test_container:latest
       - name: create output runfolders
         run: mkdir fastq logs
       - name: run container
