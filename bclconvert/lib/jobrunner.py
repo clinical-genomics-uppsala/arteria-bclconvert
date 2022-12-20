@@ -4,6 +4,7 @@
 from localq import LocalQServer, Status
 from arteria.web.state import State as arteria_state
 
+
 class JobRunnerAdapter:
     """
     Specifies interface that should be used by jobrunners.
@@ -67,7 +68,6 @@ class LocalQAdapter(JobRunnerAdapter):
         :return: the arteria state
         """
 
-
         if status == Status.COMPLETED:
             return arteria_state.DONE
         elif status == Status.FAILED:
@@ -84,7 +84,7 @@ class LocalQAdapter(JobRunnerAdapter):
             return arteria_state.NONE
 
     # TODO Make configurable
-    def __init__(self, nbr_of_cores, interval = 30, priority_method = "fifo"):
+    def __init__(self, nbr_of_cores, interval=30, priority_method="fifo"):
         self.nbr_of_cores = nbr_of_cores
         self.server = LocalQServer(nbr_of_cores, interval, priority_method)
         self.server.run()
