@@ -67,7 +67,7 @@ def bcl_convert(bcl_inputdirectory,
     if bcl_sampleproject_subdirectories == "true":
         bcl_sampleproject_subdirectories = True
     else:
-        bclsampleprojectsubdirectories = False
+        bcl_sampleproject_subdirectories = False
 
     if sample_sheet is None:
         sample_sheet = os.path.join(bcl_inputdirectory, "SampleSheet.csv")
