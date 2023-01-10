@@ -1,0 +1,28 @@
+[Header],,,,,,,,,,
+IEMFileVersion,4,,,,,,,,,
+Investigator Name,,,,,,,,,,
+Experiment Name,20221213_HN-GL-MS,,,,,,,,,
+Date,20221216,,,,,,,,,
+Project,New Project,,,,,,,,,
+Workflow,GenerateFASTQ,,,,,,,,,
+[Reads],,,,,,,,,,
+151,,,,,,,,,,
+151,,,,,,,,,,
+[Settings],,,,,,,,,,
+AdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,,,,,,,,,
+AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT,,,,,,,,,
+OverrideCycles,U3N2Y146;I8;I8;U3N2Y146,,,,,,,,,
+[Data],,,,,,,,,,
+Sample_ID,index,index2,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,I5_Index_ID,Sample_Project,Description,TC
+22-2937,GTGCCATA,CTCCTAGT,,,,,,DNA,xGen_UDI_Index20,0.6
+22-2895,GAATCCGA,AGCTAGTG,,,,,,DNA,xGen_UDI_Index21,0.95
+22-2894,TCGCTGTT,CAAGTCGT,,,,,,DNA,xGen_UDI_Index22,0.8
+22-2893,TTCGTTGG,TACACACG,,,,,,DNA,xGen_UDI_Index23,0.3
+22-2890,CCTTGATC,GATGGAGT,,,,,,DNA,xGen_UDI_Index25,0.2
+22-2892,GTCGAAGA,CCACATTG,,,,,,DNA,xGen_UDI_Index26,0.9
+R22-647,ACCACGAT,GTCTGCAA,,,,,,RNA,xGen_UDI_Index27,
+R22-639,GATTACCG,TTGGACTG,,,,,,RNA,xGen_UDI_Index28,
+R22-638,GCACAACT,CTGAACGT,,,,,,RNA,xGen_UDI_Index29,
+R22-637,GCGTCATT,CAGACGTT,,,,,,RNA,xGen_UDI_Index30,
+R22-634,ATCCGGTA,GACCGATA,,,,,,RNA,xGen_UDI_Index31,
+R22-636,CGTTGCAA,ATAGAGCG,,,,,,RNA,xGen_UDI_Index32,
