@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import gzip
 import shutil
 import logging
 import click
@@ -118,10 +119,32 @@ def bcl_convert(bcl_inputdirectory,
                         log.debug(f"\t: {fastq1_name}")
                         log.debug(f"\t: {fastq2_name}")
                         log.debug(f"Creating output directory: {output_directory}")
-                        with open(fastq1_name, 'w') as w:
-                            w.write("DUMMY_1 {fastq1_name}")
-                        with open(fastq2_name, 'w') as w:
-                            w.write("DUMMY_2 {fastq2_name}")
+                        with gzip.open(fastq1_name, 'bw') as w:
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                        with gzip.open(fastq2_name, 'bw') as w:
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
 
                     else:
                         lanes = [1, 2, 3 ,4]
@@ -134,10 +157,32 @@ def bcl_convert(bcl_inputdirectory,
                                 os.makedirs(os.path.join(output_directory, project), exist_ok=True)
                             fastq1_name = str(os.path.join(output_directory, fastq1_name))
                             fastq2_name = str(os.path.join(output_directory, fastq2_name))
-                            with open(fastq1_name, 'w') as w:
-                                w.write("DUMMY_1 {fastq1_name}")
-                            with open(fastq2_name, 'w') as w:
-                                w.write("DUMMY_2 {fastq2_name}")
+                            with gzip.open(fastq1_name, 'wb') as w:
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                            with gzip.open(fastq2_name, 'wb') as w:
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
                             log.debug(f"\t: {fastq1_name}")
                             log.debug(f"\t: {fastq2_name}")
     time.sleep(5)
