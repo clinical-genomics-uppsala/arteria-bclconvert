@@ -11,7 +11,7 @@ log = logging.getLogger()
 
 #
 @click.command()
-@click.option("--bcl-inputdirectory", prompt="bcl input directory", required=True, type=str, help="bcl input directory",)
+@click.option("--bcl-input-directory", prompt="bcl input directory", required=True, type=str, help="bcl input directory",)
 @click.option("--output-directory", prompt="output directory", required=True, type=str, help="output directoryy",)
 @click.option("--sample-sheet", required=False, default=None, type=str, help="sample sheet",)
 @click.option("--run-info", default="RunInfo.xml", required=False, type=str, help="run info",)
