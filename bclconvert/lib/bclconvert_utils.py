@@ -446,7 +446,7 @@ class BclConvertRunner(BaseBclConvertRunner):
         # Assumes configureBclToFastq.pl on path
         commandline_collection = [
             self.binary,
-            "--bcl-inputdirectory", self.config.runfolder_input,
+            "--bcl-input-directory", self.config.runfolder_input,
             "--sample-sheet", self.config.samplesheet_file,
             "--output-directory", self.config.output,
             "--force"  # overwrite output if it exists.
