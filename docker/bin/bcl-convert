@@ -50,9 +50,9 @@ def bcl_convert(bcl_input_directory,
                 exclude_tiles=None,
                 sample_name_column_enabled=None,
                 fastq_gzip_compression_level=None):
-    log.debug(f"Looking for input directory: {bcl_inputdirectory}")
-    if not os.path.isdir(bcl_inputdirectory):
-        raise Exception(f"directory does not exist {bcl_inputdirectory}")
+    log.debug(f"Looking for input directory: {bcl_input_directory}")
+    if not os.path.isdir(bcl_input_directory):
+        raise Exception(f"directory does not exist {bcl_input_directory}")
 
     log.debug(f"Creating output directory: {output_directory}")
     if not os.path.isdir(output_directory):
@@ -71,7 +71,7 @@ def bcl_convert(bcl_input_directory,
         bcl_sampleproject_subdirectories = False
 
     if sample_sheet is None:
-        sample_sheet = os.path.join(bcl_inputdirectory, "SampleSheet.csv")
+        sample_sheet = os.path.join(bcl_input_directory, "SampleSheet.csv")
 
     data_section = False
     header_map = {}
