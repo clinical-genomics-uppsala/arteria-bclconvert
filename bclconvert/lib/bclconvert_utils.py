@@ -180,6 +180,7 @@ class BclConvertConfig:
                                  "A": "NovaSeq",
                                  "NS": "NextSeq 500",
                                  "NB": "NextSeq 500 D",
+                                 "NDX": "NextSeq 550 DX",
                                  "K": "HiSeq 4000",
                                  "FS": "ISeq 100"}
 
@@ -446,7 +447,7 @@ class BclConvertRunner(BaseBclConvertRunner):
         # Assumes configureBclToFastq.pl on path
         commandline_collection = [
             self.binary,
-            "--bcl-inputdirectory", self.config.runfolder_input,
+            "--bcl-input-directory", self.config.runfolder_input,
             "--sample-sheet", self.config.samplesheet_file,
             "--output-directory", self.config.output,
             "--force"  # overwrite output if it exists.

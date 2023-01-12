@@ -11,7 +11,7 @@ log = logging.getLogger()
 
 #
 @click.command()
-@click.option("--bcl-inputdirectory", prompt="bcl input directory", required=True, type=str, help="bcl input directory",)
+@click.option("--bcl-input-directory", prompt="bcl input directory", required=True, type=str, help="bcl input directory",)
 @click.option("--output-directory", prompt="output directory", required=True, type=str, help="output directoryy",)
 @click.option("--sample-sheet", required=False, default=None, type=str, help="sample sheet",)
 @click.option("--run-info", default="RunInfo.xml", required=False, type=str, help="run info",)
@@ -34,7 +34,7 @@ log = logging.getLogger()
 #@click.option("--output-legacy-stats true", prompt="no sample sheet", required=True, type=boolean, default=False, help="no sample sheet",)
 @click.option("--sample-name-column-enabled", default="false", required=False, type=str, help="sample name column enabled",)
 @click.option("--fastq-gzip-compression-level", default="1", required=False, type=str, help="fastq gzip compression level [0-9]",)
-def bcl_convert(bcl_inputdirectory,
+def bcl_convert(bcl_input_directory,
                 output_directory,
                 sample_sheet=None,
                 run_info=None,
@@ -50,9 +50,9 @@ def bcl_convert(bcl_inputdirectory,
                 exclude_tiles=None,
                 sample_name_column_enabled=None,
                 fastq_gzip_compression_level=None):
-    log.debug(f"Looking for input directory: {bcl_inputdirectory}")
-    if not os.path.isdir(bcl_inputdirectory):
-        raise Exception(f"directory does not exist {bcl_inputdirectory}")
+    log.debug(f"Looking for input directory: {bcl_input_directory}")
+    if not os.path.isdir(bcl_input_directory):
+        raise Exception(f"directory does not exist {bcl_input_directory}")
 
     log.debug(f"Creating output directory: {output_directory}")
     if not os.path.isdir(output_directory):
@@ -71,7 +71,7 @@ def bcl_convert(bcl_inputdirectory,
         bcl_sampleproject_subdirectories = False
 
     if sample_sheet is None:
-        sample_sheet = os.path.join(bcl_inputdirectory, "SampleSheet.csv")
+        sample_sheet = os.path.join(bcl_input_directory, "SampleSheet.csv")
 
     data_section = False
     header_map = {}

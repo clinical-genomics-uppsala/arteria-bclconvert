@@ -17,7 +17,7 @@ on:
 jobs:
   dry_run: # health check job for testing and code formatting check
     name: test service
-    runs-on: ubuntu-latest # os for running the job
+    runs-on: ubuntu-22.04 # os for running the job
     strategy:
       fail-fast: false
       matrix:
@@ -45,7 +45,10 @@ jobs:
         run: >
           curl http://127.0.0.1:8888/api/1.0/status/1
       - name: sleep
-        run: sleep 15
+        run: sleep 20
+      - name: check status
+        run: >
+          curl http://127.0.0.1:8888/api/1.0/status/1
       - name: check that status is done
         run: >
           curl http://127.0.0.1:8888/api/1.0/status/1 | python -c 'import sys; import json; exit(0) if (json.loads(sys.stdin.read()))["state"] == "done" else exit(1)'
