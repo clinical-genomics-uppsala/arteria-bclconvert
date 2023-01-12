@@ -34,7 +34,7 @@ log = logging.getLogger()
 #@click.option("--output-legacy-stats true", prompt="no sample sheet", required=True, type=boolean, default=False, help="no sample sheet",)
 @click.option("--sample-name-column-enabled", default="false", required=False, type=str, help="sample name column enabled",)
 @click.option("--fastq-gzip-compression-level", default="1", required=False, type=str, help="fastq gzip compression level [0-9]",)
-def bcl_convert(bcl_inputdirectory,
+def bcl_convert(bcl_input_directory,
                 output_directory,
                 sample_sheet=None,
                 run_info=None,
