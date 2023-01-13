@@ -14,4 +14,4 @@ jobs:
         with:
           release-type: python
           package-name: arteria-bclconvert
-          default-branch: master
+          default-branch: main
