@@ -28,27 +28,25 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: 3.8
-      - name: build docker container
-        run: >
-          docker  build --build-arg VERSION=${GITHUB_REF##*/} ./docker -f ./docker/dummy_service.Dockerfile  -t test_container:latest
       - name: create output runfolders
-        run: mkdir fastq logs
-      - name: run container
+        run: mkdir -p test/fastq test/logs
+      - name: start docker container
         run: >
-          docker run -d -p 8888:8888 -v ${PWD}/tests/runfolders:/runfolders:rw -v ${PWD}/fastq:/fastq:rw -v ${PWD}/logs:/bclconvert_logs test_container:latest sh -c 'bclconvert-ws --debug --config config/ --port 8888'
+          VERSION=${GITHUB_REF##*/} docker-compose -f docker-compose-test.yaml up -d
+        working-directory: docker
       - name: sleep 5
         run: sleep 5
       - name: start processing
         run: >
-          curl -X POST --data '{"additional_args": ""}' http://127.0.0.1:8888/api/1.0/start/runfolder1
+          curl -X POST --data '{"additional_args": ""}' http://127.0.0.1:10900/api/1.0/start/runfolder1
       - name: check status
         run: >
-          curl http://127.0.0.1:8888/api/1.0/status/1
+          curl http://127.0.0.1:10900/api/1.0/status/1
       - name: sleep
         run: sleep 20
       - name: check status
         run: >
-          curl http://127.0.0.1:8888/api/1.0/status/1
+          curl http://127.0.0.1:10900/api/1.0/status/1
       - name: check that status is done
         run: >
-          curl http://127.0.0.1:8888/api/1.0/status/1 | python -c 'import sys; import json; exit(0) if (json.loads(sys.stdin.read()))["state"] == "done" else exit(1)'
+          curl http://127.0.0.1:10900/api/1.0/status/1 | python -c 'import sys; import json; exit(0) if (json.loads(sys.stdin.read()))["state"] == "done" else exit(1)'
