@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   bclconvert:
+     image: gmsuppsala/bclconvert_test:${VERSION:-develop}
      build:
       context: .
       dockerfile: dummy_service.Dockerfile
