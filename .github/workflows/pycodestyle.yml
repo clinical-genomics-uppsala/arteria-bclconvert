@@ -1,0 +1,31 @@
+name: pycodestyle
+
+on:
+  push:
+    branches:
+     - develop
+     - main
+  pull_request:
+    branches:
+     - develop
+     - main
+  workflow_dispatch:
+
+jobs:
+  pycodestyle:
+    name: pycodestyle
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+      - name: Add conda to system path
+        run: |
+          echo $CONDA/bin >> $GITHUB_PATH
+      - name: Install pycodestyle==2.8.0
+        run: |
+          pip install pycodestyle
+      - name: run pycodestyle
+        run: pycodestyle --max-line-length=140 --statistics bclconvert

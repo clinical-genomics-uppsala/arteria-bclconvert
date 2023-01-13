@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  bclconvert:
+     build:
+      context: .
+      dockerfile: Dockerfile
+     entrypoint: ["sh", "-c", 'bclconvert-ws --config /etc/bcl-convert/ --port 10900']
+     ports:
+         - 10900:10900
+     networks:
+         - private
+     volumes:
+       - ./config_dev/bcl-convert-app.config:/etc/bcl-convert/app.config:ro
+       - ./config_dev/bcl-convert-logger.config:/etc/bcl-convert/logger.config:ro
+       - ./data/runfolders:/data/:rw
+       - ./data/fastq:/fastq:rw
+       - ./data/logs:/bclconvert_logs:rw
+
+networks:
+  private:
+    driver: bridge

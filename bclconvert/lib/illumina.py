@@ -3,6 +3,7 @@
 
 from pandas import read_csv
 
+
 class SampleRow:
     """
     Provides a representation of the information presented in a Illumina Samplesheet.
@@ -54,6 +55,7 @@ class SampleRow:
         else:
             False
 
+
 class Samplesheet:
     """
     Represent information contanied in a Illumina samplesheet
@@ -79,14 +81,14 @@ class Samplesheet:
         def find_data_line():
             enumurated_lines = list(enumerate(samplesheet_file_handle))
             lines_with_obsolete_settings = list(filter(lambda x: "Adapter," in x[1] or
-                                                    "TrimAdapter," in x[1] or
-                                                    "MaskAdapter," in x[1] or
-                                                    "Read1StartFromCycle," in x[1] or
-                                                    "Read2StartFromCycle," in x[1] or
-                                                    "Read1UMIStartFromCycle," in x[1] or
-                                                    "Read2UMIStartFromCycle," in x[1] or
-                                                    "Read1UMILength," in x[1] or
-                                                    "Read2UMILength," in x[1], enumurated_lines))
+                                                                 "TrimAdapter," in x[1] or
+                                                                 "MaskAdapter," in x[1] or
+                                                                 "Read1StartFromCycle," in x[1] or
+                                                                 "Read2StartFromCycle," in x[1] or
+                                                                 "Read1UMIStartFromCycle," in x[1] or
+                                                                 "Read2UMIStartFromCycle," in x[1] or
+                                                                 "Read1UMILength," in x[1] or
+                                                                 "Read2UMILength," in x[1], enumurated_lines))
             assert len(lines_with_obsolete_settings) == 0, f"SampleSheet contain obsolete settings {lines_with_obsolete_settings}"
             lines_with_data = list(filter(lambda x: "[Data]" in x[1] or "[data]" in x[1] or "[BCLConvert_Data]" in x[1], enumurated_lines))
             assert len(lines_with_data) == 1, "There wasn't strictly one line in samplesheet with line '[Data]'"
@@ -97,7 +99,7 @@ class Samplesheet:
             return SampleRow(lane=row.get("Lane"), sample_id=row.get("Sample_ID"), sample_name=row.get("Sample_Name"),
                              sample_plate=row.get("Sample_Plate"), sample_well=row.get("Sample_Well"),
                              index1=row.get("index"), index2=row.get("index2"),
-                             sample_project=row.get("Sample_Project",row.get("Project")), description=row.get("Description"))
+                             sample_project=row.get("Sample_Project", row.get("Project")), description=row.get("Description"))
 
         lines_to_skip = find_data_line() + 1
         # Ensure that pointer is at beginning of file again.

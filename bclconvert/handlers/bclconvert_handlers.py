@@ -12,8 +12,8 @@ from arteria.exceptions import ArteriaUsageException
 from arteria.web.state import State
 from arteria.web.handlers import BaseRestHandler
 
-
 log = logging.getLogger(__name__)
+
 
 class BclConvertServiceMixin:
     """
@@ -22,7 +22,6 @@ class BclConvertServiceMixin:
     request is made and then keep that adaptor. These adaptors are static,
     so that only one such adaptor is created for the entire application.
     """
-
     _runner_service = None
 
     @staticmethod
@@ -52,11 +51,11 @@ class BclConvertServiceMixin:
             BclConvertServiceMixin._bclconvert_cmd_generation_service = BclConvertRunnerFactory(config)
             return BclConvertServiceMixin._bclconvert_cmd_generation_service
 
+
 class BaseBclConvertHandler(BaseRestHandler):
     """
     Base handler for bclconvert.
     """
-
     def initialize(self, config):
         """
         Ensures that any parameters feed to this are available
@@ -118,9 +117,11 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         bcl_num_decompression_threads = None
         additional_args = ""
 
-        runfolder_base_path = self.config["runfolder_path"]
-        runfolder_input = os.path.join(runfolder_base_path, runfolder)
-        
+        for runfolders_path in self.config["runfolder_path"]:
+            if os.path.isdir(os.path.join(runfolders_path, runfolder_input)):
+                runfolder_input = os.path.join(runfolders_path, runfolder)
+                break
+
         if not os.path.isdir(runfolder_input):
             raise ArteriaUsageException(f"No such file: {runfolder_input}")
 
@@ -245,12 +246,10 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
             self.send_error(status_code=500, reason=e)
 
 
-
 class StatusHandler(BaseBclConvertHandler, BclConvertServiceMixin):
     """
     Get the status of one or all jobs.
     """
-
     def get(self, job_id):
         """
         Get the status of the specified job_id, or if now id is given, the
@@ -263,7 +262,7 @@ class StatusHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         else:
             all_status = self.runner_service().status_all()
             status_dict = {}
-            for k,v in all_status.items():
+            for k, v in all_status.items():
                 status_dict[k] = {"state": v}
             status = status_dict
 

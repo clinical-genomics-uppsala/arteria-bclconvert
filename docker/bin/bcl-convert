@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+
+import os
+import gzip
+import shutil
+import logging
+import click
+import time
+
+log = logging.getLogger()
+
+#
+@click.command()
+@click.option("--bcl-input-directory", prompt="bcl input directory", required=True, type=str, help="bcl input directory",)
+@click.option("--output-directory", prompt="output directory", required=True, type=str, help="output directoryy",)
+@click.option("--sample-sheet", required=False, default=None, type=str, help="sample sheet",)
+@click.option("--run-info", default="RunInfo.xml", required=False, type=str, help="run info",)
+#@click.option("--first-tileonly", is_flag=True. default=False, prompt="first tile only", required=False, type=str, help="first tile only",)
+#@click.option("--bcl-onlylane", prompt="bcl onlylane", required=False, type=str, help="bcl onlylane",)
+@click.option("-f", "--force", required=False, is_flag=True, default=False, help="",)
+@click.option("--strict-mode", required=False, type=str, default="false", help="strict mode",)
+@click.option("--bcl-sampleproject-subdirectories", default="false",
+              required=False, type=str, help="bcl sample project subdirectories",)
+#@click.option("--no-lane-splitting-true", is_flag=True, default=False prompt="first tile only true", required=False, help="first tile only true",)
+@click.option("--no-lane-splitting", required=False, type=str, default="false", help="no lane splitting",)
+@click.option("--bcl-num-parallel-tiles", required=False, type=str, default="1", help="bcl num parallele tiles",)
+@click.option("--bcl-num-conversion-threads", required=False, type=str, default="1", help="bcl num conversion threads",)
+@click.option("--bcl-num-compression-threads", required=False, type=str, default="1", help="bcl num comp threads",)
+@click.option("--bcl-num-decompression-threads", required=False, type=str, default="1", help="bcl num decomp threads",)
+#@click.option("--bcl-only-matched-reads-true", prompt="bcl only matched reads true", required=True, type=str, help="bcl only matched reads true",)
+@click.option("--tiles", required=False, default="", type=str, help="tiles",)
+@click.option("--exclude-tiles", required=False, default="", type=str, help="exclude tiles",)
+#@click.option("--no-sample-sheet", prompt="no sample sheet", required=True, type=boolean, default=False, help="no sample sheet",)
+#@click.option("--output-legacy-stats true", prompt="no sample sheet", required=True, type=boolean, default=False, help="no sample sheet",)
+@click.option("--sample-name-column-enabled", default="false", required=False, type=str, help="sample name column enabled",)
+@click.option("--fastq-gzip-compression-level", default="1", required=False, type=str, help="fastq gzip compression level [0-9]",)
+def bcl_convert(bcl_input_directory,
+                output_directory,
+                sample_sheet=None,
+                run_info=None,
+                force=False,
+                strict_mode=None,
+                bcl_sampleproject_subdirectories=None,
+                no_lane_splitting=None,
+                bcl_num_parallel_tiles="1",
+                bcl_num_conversion_threads="1",
+                bcl_num_compression_threads="1",
+                bcl_num_decompression_threads="1",
+                tiles=None,
+                exclude_tiles=None,
+                sample_name_column_enabled=None,
+                fastq_gzip_compression_level=None):
+    log.debug(f"Looking for input directory: {bcl_input_directory}")
+    if not os.path.isdir(bcl_input_directory):
+        raise Exception(f"directory does not exist {bcl_input_directory}")
+
+    log.debug(f"Creating output directory: {output_directory}")
+    if not os.path.isdir(output_directory):
+        os.mkdir(output_directory)
+    else:
+        if force:
+            shutil.rmtree(output_directory)
+        os.mkdir(output_directory)
+    if no_lane_splitting == "true":
+        no_lane_splitting = True
+    else:
+        no_lane_splitting = False
+    if bcl_sampleproject_subdirectories == "true":
+        bcl_sampleproject_subdirectories = True
+    else:
+        bcl_sampleproject_subdirectories = False
+
+    if sample_sheet is None:
+        sample_sheet = os.path.join(bcl_input_directory, "SampleSheet.csv")
+
+    data_section = False
+    header_map = {}
+    s_index_counter = 0
+    time.sleep(5)
+    log.debug(f"Parsing sample sheet: {sample_sheet}")
+    with open(sample_sheet, 'r') as reader:
+        for row in reader:
+            if '[data]' in row.lower():
+                row = next(reader)
+                col = row.lower().split(',')
+                for i, v in enumerate(col):
+                    header_map[v] = i
+                logs = os.path.join(output_directory, 'Logs')
+                os.mkdir(logs)
+                with open(os.path.join(logs, 'Errors.log'), 'w') as w:
+                    w.write("ERROR")
+                with open(str(os.path.join(logs, 'Info.log')), 'w') as w:
+                    w.write("INFO")
+                with open(os.path.join(logs, 'Warnings.log'), 'w') as w:
+                    w.write("WARNING")
+                reports = str(os.path.join(output_directory, 'Reports'))
+                os.mkdir(reports)
+                with open(os.path.join(reports, 'fastq_list.csv'), 'w') as w:
+                    w.write("fastq_list.csv")
+                with open(os.path.join(reports, 'RunInfo.xml'), 'w') as w:
+                    w.write("RunInfo.xml")
+                with open(os.path.join(reports, 'SampleSheet.csv'), 'w') as w:
+                    w.write("SampleSheet.csv")
+                log.debug(f"Creating fastq files:")
+                for row in reader:
+                    s_index_counter = s_index_counter + 1
+                    row = row.split(",")
+                    sample_id = row[header_map['sample_id']]
+                    project = row[header_map['sample_project']]
+                    if no_lane_splitting:
+                        fastq1_name = f"{sample_id}_S{s_index_counter}_R1_001.fastq.gz"
+                        fastq2_name = f"{sample_id}_S{s_index_counter}_R2_001.fastq.gz"
+                        if bcl_sampleproject_subdirectories:
+                            fastq1_name = str(os.path.join(project, fastq1_name))
+                            fastq2_name = str(os.path.join(project, fastq2_name))
+                            os.makedirs(os.path.join(output_directory, row['project']), exist_ok=True)
+                        fastq1_name = str(os.path.join(output_directory, fastq1_name))
+                        fastq2_name = str(os.path.join(output_directory, fastq2_name))
+                        log.debug(f"\t: {fastq1_name}")
+                        log.debug(f"\t: {fastq2_name}")
+                        log.debug(f"Creating output directory: {output_directory}")
+                        with gzip.open(fastq1_name, 'bw') as w:
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                        with gzip.open(fastq2_name, 'bw') as w:
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+                            w.write(b"@NB501298:412:H7VHJBGXN:1:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n")
+                            w.write(b"ACGT\n")
+                            w.write(b"+\n")
+                            w.write(b"EEEE\n")
+
+                    else:
+                        lanes = [1, 2, 3 ,4]
+                        for l in lanes:
+                            fastq1_name = f"{sample_id}_S{s_index_counter}_L00{l}_R1_001.fastq.gz"
+                            fastq2_name = f"{sample_id}_S{s_index_counter}_L00{l}_R2_001.fastq.gz"
+                            if bcl_sampleproject_subdirectories:
+                                fastq1_name = str(os.path.join(project, fastq1_name))
+                                fastq2_name = str(os.path.join(project, fastq2_name))
+                                os.makedirs(os.path.join(output_directory, project), exist_ok=True)
+                            fastq1_name = str(os.path.join(output_directory, fastq1_name))
+                            fastq2_name = str(os.path.join(output_directory, fastq2_name))
+                            with gzip.open(fastq1_name, 'wb') as w:
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                            with gzip.open(fastq2_name, 'wb') as w:
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                                w.write(f"@NB501298:412:H7VHJBGXN:{l}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+                                w.write(b"ACGT\n")
+                                w.write(b"+\n")
+                                w.write(b"EEEE\n")
+                            log.debug(f"\t: {fastq1_name}")
+                            log.debug(f"\t: {fastq2_name}")
+    time.sleep(5)
+    exit(0)
+
+if __name__ == "__main__":
+    bcl_convert(obj={})
