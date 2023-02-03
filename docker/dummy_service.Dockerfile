@@ -2,6 +2,10 @@ FROM python:3.9
 
 ARG VERSION=develop
 
+LABEL maintainer="patrik.smeds@scilifelab.uu.se"
+LABEL version=$VERSION
+LABEL bclconvert=dummy_script
+
 RUN apt update && apt install git
 
 RUN useradd stanley
