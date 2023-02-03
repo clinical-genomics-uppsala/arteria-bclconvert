@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.1.1](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/compare/v0.1.0...v0.1.1) (2023-02-03)
+
+
+### Bug Fixes
+
+* stop creating symlink folder for Unaligned ([00d1d3a](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/00d1d3a3f17d1fb71a104754e8646e42f4db9a5e))
+
 ## 0.1.0 (2023-01-13)
 
 
