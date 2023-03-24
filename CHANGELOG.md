@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.1.2](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/compare/v0.1.1...v0.1.2) (2023-03-24)
+
+
+### Bug Fixes
+
+* use correct variable when looking complete runfolder path ([7badfcb](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/7badfcb530e1db2f3fe34f45cc0ce7e2000faab3))
+
 ### [0.1.1](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/compare/v0.1.0...v0.1.1) (2023-02-03)
 
 
