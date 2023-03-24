@@ -118,7 +118,7 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         additional_args = ""
 
         for runfolders_path in self.config["runfolder_path"]:
-            if os.path.isdir(os.path.join(runfolders_path, runfolder_input)):
+            if os.path.isdir(os.path.join(runfolders_path, runfolder)):
                 runfolder_input = os.path.join(runfolders_path, runfolder)
                 break
 
