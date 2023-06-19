@@ -180,6 +180,8 @@ class BclConvertConfig:
                                  "A": "NovaSeq",
                                  "NS": "NextSeq 500",
                                  "NB": "NextSeq 500 D",
+                                 "VL": "NextSeq 1000",
+                                 "VH": "NextSeq 2000",
                                  "NDX": "NextSeq 550 DX",
                                  "K": "HiSeq 4000",
                                  "FS": "ISeq 100"}
