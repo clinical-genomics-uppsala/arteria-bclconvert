@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/compare/v0.1.2...v0.2.0) (2023-06-19)
+
+
+### Features
+
+* add NextSeq 1000/2000 mappings ([32a1931](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/32a1931efd7125cd051083449f6db12406c381c1))
+
 ### [0.1.2](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/compare/v0.1.1...v0.1.2) (2023-03-24)
 
 
