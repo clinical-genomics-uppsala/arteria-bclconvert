@@ -292,6 +292,71 @@ class BclConvertConfig:
 
         return base_masks
 
+    @staticmethod
+    def parse_lanes_to_tiles_regex(lanes_spec):
+        """
+        Convert user-friendly lane specification to bcl-convert --tiles regex.
+
+        Supports flexible lane specifications:
+        - Single lane: "1" -> "s_1"
+        - Multiple lanes: "13" -> "s_[13]"
+        - Range: "3-5" -> "s_[3-5]"
+        - Mixed: "13-5" -> "s_[13-5]" (lanes 1, 3, 4, 5)
+        - Complex: "1-46-7" -> "s_[1-46-7]" (lanes 1, 2, 3, 4, 6, 7)
+
+        :param lanes_spec: Lane specification string
+        :return: Tiles regex pattern (e.g., "s_[13-5]")
+        :raises ArteriaUsageException: If format is invalid
+        """
+        import re
+
+        if not lanes_spec or not isinstance(lanes_spec, str):
+            raise ArteriaUsageException("lanes parameter must be a non-empty string")
+
+        # Validate format: digits and hyphens only
+        if not re.match(r'^[\d-]+$', lanes_spec):
+            raise ArteriaUsageException(
+                f"Invalid lanes format: '{lanes_spec}'. "
+                "Only digits and hyphens allowed (e.g., '13', '3-5', '13-5')"
+            )
+
+        # Check for invalid patterns
+        if lanes_spec.startswith('-') or lanes_spec.endswith('-'):
+            raise ArteriaUsageException(
+                f"Invalid lanes format: '{lanes_spec}'. Cannot start or end with hyphen"
+            )
+
+        if '--' in lanes_spec:
+            raise ArteriaUsageException(
+                f"Invalid lanes format: '{lanes_spec}'. Cannot have consecutive hyphens"
+            )
+
+        # Validate ranges (find all X-Y patterns and validate X < Y)
+        range_pattern = r'(\d)-(\d)'
+        for match in re.finditer(range_pattern, lanes_spec):
+            start = int(match.group(1))
+            end = int(match.group(2))
+
+            if start >= end:
+                raise ArteriaUsageException(
+                    f"Invalid lane range in '{lanes_spec}': {start}-{end}. Start must be less than end"
+                )
+
+        # Validate all lane numbers are 1-8
+        for char in lanes_spec:
+            if char.isdigit():
+                lane_num = int(char)
+                if lane_num < 1 or lane_num > 8:
+                    raise ArteriaUsageException(
+                        f"Lane numbers must be between 1 and 8, got: '{char}' in '{lanes_spec}'"
+                    )
+
+        # Single lane doesn't need brackets
+        if len(lanes_spec) == 1:
+            return f"s_{lanes_spec}"
+        else:
+            return f"s_[{lanes_spec}]"
+
 
 class BclConvertRunnerFactory:
     """

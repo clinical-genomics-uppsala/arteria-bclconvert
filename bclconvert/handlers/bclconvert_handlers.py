@@ -110,6 +110,7 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         exclude_tiles = ""
         use_base_mask = ""
         bcl_only_lane = None
+        lanes = None
         create_indexes = False
         bcl_num_parallel_tiles = None
         bcl_num_conversion_threads = None
@@ -168,6 +169,20 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
         if "additional_args" in request_data:
             additional_args = request_data["additional_args"]
 
+        if "lanes" in request_data:
+            lanes = request_data["lanes"]
+
+        # If lanes is specified, convert it to tiles regex
+        # If user also specified tiles, lanes takes precedence (with warning)
+        if lanes:
+            calculated_tiles = BclConvertConfig.parse_lanes_to_tiles_regex(lanes)
+            if tiles:
+                log.warning(
+                    f"Both 'lanes' and 'tiles' specified. Using lanes='{lanes}' "
+                    f"(converted to tiles='{calculated_tiles}'). Ignoring tiles parameter."
+                )
+            tiles = calculated_tiles
+
         config = BclConvertConfig(
             general_config=self.config,
             bclconvert_version=bclconvert_version,
@@ -196,7 +211,9 @@ class StartHandler(BaseBclConvertHandler, BclConvertServiceMixin):
          - output
          - samplesheet (provide the entire samplesheet in the request)
          - barcode_mismatches
-         - tiles
+         - lanes (user-friendly lane spec, e.g., "13" for lanes 1,3 or "2-6" for lanes 2-6;
+                  converted to tiles regex. Supports complex patterns like "13-5" or "1-46-7")
+         - tiles (direct tiles regex; if both lanes and tiles specified, lanes takes precedence)
          - use_base_mask
          - additional_args
         If these are not set defaults setup in bclconvertConfig will be
