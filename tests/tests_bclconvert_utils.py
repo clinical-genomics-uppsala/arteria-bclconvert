@@ -6,9 +6,9 @@ from mock import patch
 import tempfile
 import os
 
-from bcl2fastq.lib.bcl2fastq_utils import *
-from bcl2fastq.lib.illumina import Samplesheet
-from test_utils import TestUtils, DummyConfig
+from bclconvert.lib.bclconvert_utils import *
+from bclconvert.lib.illumina import Samplesheet
+from .test_utils import TestUtils, DummyConfig
 
 
 DUMMY_CONFIG = DummyConfig()
@@ -22,7 +22,7 @@ class TestBclConvertConfig(unittest.TestCase):
 
     def test_get_bclconvert_version_from_run_parameters(self):
         runfolder = TestBclConvertConfig.test_dir + "/sampledata/HiSeq-samples/2014-02_13_average_run"
-        version = BclConvertConfig.get_bcl2fastq_version_from_run_parameters(runfolder, self.dummy_config)
+        version = BclConvertConfig.get_bclconvert_version_from_run_parameters(runfolder, self.dummy_config)
         self.assertEqual(version, "4.0.3")
 
     def test_is_single_read_true(self):
@@ -53,7 +53,7 @@ class TestBclConvertConfig(unittest.TestCase):
             # but the write it self should be trivial.
             config = BclConvertConfig(
                 general_config = DUMMY_CONFIG,
-                bcl2fastq_version = "4.0.3",
+                bclconvert_version = "4.0.3",
                 runfolder_input = "test/runfolder",
                 output = "test/output",
                 samplesheet=TestUtils.DUMMY_SAMPLESHEET_STRING)
@@ -126,33 +126,33 @@ class TestBCLConvertRunnerFactory(unittest.TestCase):
     def test_create_bcl2fastq1x_runner(self):
         config = BclConvertConfig(
             general_config = DUMMY_CONFIG,
-            bcl2fastq_version = "4.0.3",
+            bclconvert_version = "4.0.3",
             runfolder_input = "test/runfolder",
             output = "test/output")
 
-        factory = BCL2FastqRunnerFactory(self.dummy_config)
+        factory = BclConvertRunnerFactory(self.dummy_config)
         runner = factory.create_bcl2fastq_runner(config)
-        self.assertIsInstance(runner, BCL2Fastq1xRunner)
+        self.assertIsInstance(runner, BclConvertRunner)
 
     def test_create_bcl2fastq2x_runner(self):
         config = BclConvertConfig(
             general_config = DUMMY_CONFIG,
-            bcl2fastq_version = "4.0.3",
+            bclconvert_version = "4.0.3",
             runfolder_input = "test/runfolder",
             output = "test/output")
 
-        factory = BCL2FastqRunnerFactory(self.dummy_config)
+        factory = BclConvertRunnerFactory(self.dummy_config)
         runner = factory.create_bcl2fastq_runner(config)
         self.assertIsInstance(runner, BCLConvertRunner, msg="runner is: " + str(runner))
 
     def test_create_invalid_version_runner(self):
         config = BclConvertConfig(
             general_config = DUMMY_CONFIG,
-            bcl2fastq_version = "1.7",
+            bclconvert_version = "1.7",
             runfolder_input = "test/runfolder",
             output = "test/output")
 
-        factory = BCL2FastqRunnerFactory(self.dummy_config)
+        factory = BclConvertRunnerFactory(self.dummy_config)
         with self.assertRaises(LookupError):
             factory.create_bcl2fastq_runner(config)
 
@@ -162,7 +162,7 @@ class TestConvertRunner(unittest.TestCase):
 
         config = BclConvertConfig(
             general_config = DUMMY_CONFIG,
-            bcl2fastq_version = "4.0.3",
+            bclconvert_version = "4.0.3",
             runfolder_input = "test/runfolder",
             output = "test/output",
             barcode_mismatches = "2",
@@ -185,7 +185,7 @@ class TestBCLConvertRunner(unittest.TestCase):
 
     config = BclConvertConfig(
         general_config = DUMMY_CONFIG,
-        bcl2fastq_version = "4.0.3",
+        bclconvert_version = "4.0.3",
         runfolder_input = "test/runfolder",
         output = "test/output",
         barcode_mismatches = "2",
@@ -193,10 +193,10 @@ class TestBCLConvertRunner(unittest.TestCase):
         use_base_mask="--use-bases-mask y*,i6,i6,y* --use-bases-mask 1:y*,i5,i5,y*",
         additional_args="--my-best-arg 1 --my-best-arg 2")
 
-    class DummyBCLConvertRunner(BCL2FastqRunner):
+    class DummyBCLConvertRunner(BclConvertRunner):
         def __init__(self, config, binary, dummy_command):
             self.dummy_command = dummy_command
-            BCL2FastqRunner.__init__(self, config, binary)
+            BclConvertRunner.__init__(self, config, binary)
 
         def construct_command(self):
             return self.dummy_command
@@ -227,3 +227,75 @@ class TestBCLConvertRunner(unittest.TestCase):
                 dummy_runner.symlink_output_to_unaligned()
                 m.assert_called_with(TestBCLConvertRunner.config.output,
                                      TestBCLConvertRunner.config.runfolder_input + "/Unaligned")
+
+
+class TestLaneParsing(unittest.TestCase):
+    """Test lane specification parsing to tiles regex"""
+
+    def test_parse_single_lane(self):
+        result = BclConvertConfig.parse_lanes_to_tiles_regex("1")
+        self.assertEqual(result, "s_1")
+
+    def test_parse_multiple_lanes(self):
+        result = BclConvertConfig.parse_lanes_to_tiles_regex("13")
+        self.assertEqual(result, "s_1+s_3")
+
+    def test_parse_lane_range(self):
+        result = BclConvertConfig.parse_lanes_to_tiles_regex("2-6")
+        self.assertEqual(result, "s_[2-6]")
+
+    def test_parse_full_range(self):
+        result = BclConvertConfig.parse_lanes_to_tiles_regex("1-8")
+        self.assertEqual(result, "s_[1-8]")
+
+    def test_parse_mixed_lanes_and_range(self):
+        result = BclConvertConfig.parse_lanes_to_tiles_regex("13-5")
+        self.assertEqual(result, "s_1+s_[3-5]")
+
+    def test_parse_complex_pattern(self):
+        result = BclConvertConfig.parse_lanes_to_tiles_regex("1-46-7")
+        self.assertEqual(result, "s_[1-4]+s_[6-7]")
+
+    def test_invalid_format_letters(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("abc")
+
+    def test_invalid_format_special_chars(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("1,3")
+
+    def test_invalid_range_reversed(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("6-2")
+
+    def test_invalid_range_equal(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("3-3")
+
+    def test_invalid_lane_number_zero(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("0")
+
+    def test_invalid_lane_number_too_high(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("9")
+
+    def test_empty_string(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("")
+
+    def test_none_value(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex(None)
+
+    def test_starts_with_hyphen(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("-13")
+
+    def test_ends_with_hyphen(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("13-")
+
+    def test_consecutive_hyphens(self):
+        with self.assertRaises(ArteriaUsageException):
+            BclConvertConfig.parse_lanes_to_tiles_regex("1--3")
