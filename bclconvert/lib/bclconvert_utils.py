@@ -301,10 +301,10 @@ class BclConvertConfig:
 
         Supports flexible lane specifications:
         - Single lane: "1" -> "s_1"
-        - Multiple lanes: "13" -> "s_[13]"
+        - Multiple lanes: "13" -> "s_1+s_3"
         - Range: "3-5" -> "s_[3-5]"
-        - Mixed: "13-5" -> "s_[13-5]" (lanes 1, 3, 4, 5)
-        - Complex: "1-46-7" -> "s_[1-46-7]" (lanes 1, 2, 3, 4, 6, 7)
+        - Mixed: "13-5" -> "s_1+s_[3-5]" (lanes 1, 3, 4, 5)
+        - Complex: "1-46-7" -> "s_[1-4]+s_[6-7]" (lanes 1, 2, 3, 4, 6, 7)
 
         :param lanes_spec: Lane specification string
         :return: Tiles regex pattern (e.g., "s_1+s_[3-5]")
