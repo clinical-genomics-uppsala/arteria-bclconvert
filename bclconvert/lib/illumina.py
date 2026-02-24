@@ -50,10 +50,10 @@ class SampleRow:
         return str(self.__dict__)
 
     def __eq__(self, other):
-        if type(other) == type(self):
+        if isinstance(other, type(self)):
             return self.__dict__ == other.__dict__
         else:
-            False
+            return False
 
 
 class Samplesheet:
@@ -94,6 +94,13 @@ class Samplesheet:
             assert len(lines_with_data) == 1, "There wasn't strictly one line in samplesheet with line '[Data]'"
             return lines_with_data[0][0]
 
+        def find_cloud_footer_size():
+            enumurated_lines = list(enumerate(samplesheet_file_handle))
+            lines_with_data = list(filter(lambda x: "[Cloud" in x[1] or "[cloud" in x[1], enumurated_lines))
+            if len(lines_with_data) > 0:
+                return len(enumurated_lines) - lines_with_data[0][0]
+            return 0
+
         def row_to_sample_row(index_and_row):
             row = index_and_row[1]
             return SampleRow(lane=row.get("Lane"), sample_id=row.get("Sample_ID"), sample_name=row.get("Sample_Name"),
@@ -104,7 +111,9 @@ class Samplesheet:
         lines_to_skip = find_data_line() + 1
         # Ensure that pointer is at beginning of file again.
         samplesheet_file_handle.seek(0)
-        samplesheet_df = read_csv(samplesheet_file_handle, skiprows=lines_to_skip)
+        skipfooter = find_cloud_footer_size()
+        samplesheet_file_handle.seek(0)
+        samplesheet_df = read_csv(samplesheet_file_handle, skiprows=lines_to_skip, skipfooter=skipfooter)
         samplesheet_df = samplesheet_df.fillna("")
         samples = map(row_to_sample_row, samplesheet_df.iterrows())
         return list(samples)
