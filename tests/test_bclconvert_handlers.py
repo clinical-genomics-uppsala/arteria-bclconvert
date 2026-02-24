@@ -75,6 +75,30 @@ class TestBclConvertHandlers(AsyncHTTPTestCase):
             self.assertEqual(json.loads(response.body)["bclconvert_version"], "4.0.3")
             self.assertEqual(json.loads(response.body)["state"], "started")
 
+    def test_start_with_tiles_parameter(self):
+        """Test that lanes parameter is converted to tiles regex"""
+        with mock.patch.object(os.path, 'isdir', return_value=True), \
+             mock.patch.object(shutil, 'rmtree', return_value=None), \
+             mock.patch.object(BclConvertConfig, 'get_bclconvert_version_from_run_parameters', return_value="4.0.3"), \
+             mock.patch.object(BclConvertRunnerFactory, "create_bclconvert_runner") as mock_create_runner, \
+             mock.patch.object(BclConvertRunner, 'symlink_output_to_unaligned', return_value=None):
+
+            fake_runner = FakeRunner("4.0.3", self.DUMMY_RUNNER_CONF)
+            mock_create_runner.return_value = fake_runner
+
+            body = {"tiles": "s_1+s_3"}
+            response = self.fetch(
+                self.API_BASE + "/start/150415_D00457_0091_AC6281ANXX",
+                method="POST",
+                body=json_encode(body))
+
+            self.assertEqual(response.code, 202)
+
+            # Verify that the config passed to create_bclconvert_runner has tiles set correctly
+            call_args = mock_create_runner.call_args[0][0]  # First positional arg is config
+            self.assertEqual(call_args.tiles, "s_1+s_3")
+
+
     def test_start_with_lanes_parameter(self):
         """Test that lanes parameter is converted to tiles regex"""
         with mock.patch.object(os.path, 'isdir', return_value=True), \
@@ -118,6 +142,49 @@ class TestBclConvertHandlers(AsyncHTTPTestCase):
             self.assertEqual(response.code, 202)
             call_args = mock_create_runner.call_args[0][0]
             self.assertEqual(call_args.tiles, "s_[2-6]")
+
+    def test_start_tile_range(self):
+        """Test lanes parameter with range"""
+        with mock.patch.object(os.path, 'isdir', return_value=True), \
+             mock.patch.object(shutil, 'rmtree', return_value=None), \
+             mock.patch.object(BclConvertConfig, 'get_bclconvert_version_from_run_parameters', return_value="4.0.3"), \
+             mock.patch.object(BclConvertRunnerFactory, "create_bclconvert_runner") as mock_create_runner, \
+             mock.patch.object(BclConvertRunner, 'symlink_output_to_unaligned', return_value=None):
+
+            fake_runner = FakeRunner("4.0.3", self.DUMMY_RUNNER_CONF)
+            mock_create_runner.return_value = fake_runner
+
+            body = {"tiles": "s_[2-6]"}
+            response = self.fetch(
+                self.API_BASE + "/start/150415_D00457_0091_AC6281ANXX",
+                method="POST",
+                body=json_encode(body))
+
+            self.assertEqual(response.code, 202)
+            call_args = mock_create_runner.call_args[0][0]
+            self.assertEqual(call_args.tiles, "s_[2-6]")
+
+    def test_start_tiles_complex_pattern(self):
+        """Test lanes parameter with complex pattern"""
+        with mock.patch.object(os.path, 'isdir', return_value=True), \
+             mock.patch.object(shutil, 'rmtree', return_value=None), \
+             mock.patch.object(BclConvertConfig, 'get_bclconvert_version_from_run_parameters', return_value="4.0.3"), \
+             mock.patch.object(BclConvertRunnerFactory, "create_bclconvert_runner") as mock_create_runner, \
+             mock.patch.object(BclConvertRunner, 'symlink_output_to_unaligned', return_value=None):
+
+            fake_runner = FakeRunner("4.0.3", self.DUMMY_RUNNER_CONF)
+            mock_create_runner.return_value = fake_runner
+
+            body = {"tiles": "s_[1-4]+s_[6-7]"}
+            response = self.fetch(
+                self.API_BASE + "/start/150415_D00457_0091_AC6281ANXX",
+                method="POST",
+                body=json_encode(body))
+
+            self.assertEqual(response.code, 202)
+            call_args = mock_create_runner.call_args[0][0]
+            self.assertEqual(call_args.tiles, "s_[1-4]+s_[6-7]")
+
 
     def test_start_lanes_complex_pattern(self):
         """Test lanes parameter with complex pattern"""
