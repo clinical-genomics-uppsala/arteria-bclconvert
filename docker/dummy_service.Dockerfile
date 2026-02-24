@@ -14,7 +14,7 @@ RUN usermod -u 10000 stanley
 RUN groupadd -g 2004 wp4
 RUN usermod -a -G wp4 stanley
 
-WORKDIR arteria-bclconvert
+#WORKDIR arteria-bclconvert
 
 RUN mkdir -p /fastq /bclconvert-logs /runfolders
 RUN chown stanley:root -R /fastq /bclconvert-logs /runfolders /home/stanley
