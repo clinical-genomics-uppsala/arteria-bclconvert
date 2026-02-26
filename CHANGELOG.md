@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.0](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/compare/v0.2.0...v0.3.0) (2026-02-26)
+
+
+### Features
+
+* add lane-specific demultiplexing via lanes parameter ([c14b167](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/c14b167d3907e441f2b0271dbeb65f5b425712a2))
+* add NovaSeqX machine to machine type mapping dict ([c14b167](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/c14b167d3907e441f2b0271dbeb65f5b425712a2))
+* update dockerfile with new version of bcl-convert ([e608686](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/e6086863a5b7bfe38ab2a7816e63922a7a456414))
+* update dummy bclconvert run command ([e9333eb](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/e9333eb6fc8f124be9a34c3a74cf70d2686e9796))
+
+
+### Bug Fixes
+
+* add missing / to build script ([b137093](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/b13709373299d7637aeb7dc29c687433c7613d11))
+* follow illuminas regex convetion ([c14b167](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/c14b167d3907e441f2b0271dbeb65f5b425712a2))
+* handle samplesheet  containing cloud settings ([c14b167](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/c14b167d3907e441f2b0271dbeb65f5b425712a2))
+* update machine mapping information ([ae3ef3c](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/commit/ae3ef3c6bc0fc74f6c420e060182db833f69bec1))
+
 ## [0.2.0](https://www.github.com/clinical-genomics-uppsala/arteria-bclconvert/compare/v0.1.2...v0.2.0) (2023-06-19)
 
 
