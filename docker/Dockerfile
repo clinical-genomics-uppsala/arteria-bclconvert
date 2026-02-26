@@ -10,7 +10,7 @@ RUN yum update -y && yum install -y hostname unzip python3-pip python3-virtualen
 
 COPY ./local_files/bcl-convert-4.4.6-2.el8.x86_64.rpm /bcl-convert-4.4.6-2.el8.x86_64.rpm
 
-RUN yum install -y --nogpgcheck /bcl-convert-4.4.6-2.el8.x86_64.rpm && rm bcl-convert-4.4.6-2.el8.x86_64.rpm
+RUN yum install -y --nogpgcheck /bcl-convert-4.4.6-2.el8.x86_64.rpm && rm /bcl-convert-4.4.6-2.el8.x86_64.rpm
 
 RUN git clone -b $VERSION https://github.com/clinical-genomics-uppsala/arteria-bclconvert.git
 
