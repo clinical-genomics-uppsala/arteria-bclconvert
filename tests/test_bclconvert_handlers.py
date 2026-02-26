@@ -76,7 +76,7 @@ class TestBclConvertHandlers(AsyncHTTPTestCase):
             self.assertEqual(json.loads(response.body)["state"], "started")
 
     def test_start_with_tiles_parameter(self):
-        """Test that lanes parameter is converted to tiles regex"""
+        """Test that tiles parameter is converted to tiles regex"""
         with mock.patch.object(os.path, 'isdir', return_value=True), \
              mock.patch.object(shutil, 'rmtree', return_value=None), \
              mock.patch.object(BclConvertConfig, 'get_bclconvert_version_from_run_parameters', return_value="4.0.3"), \
@@ -97,7 +97,6 @@ class TestBclConvertHandlers(AsyncHTTPTestCase):
             # Verify that the config passed to create_bclconvert_runner has tiles set correctly
             call_args = mock_create_runner.call_args[0][0]  # First positional arg is config
             self.assertEqual(call_args.tiles, "s_1+s_3")
-
 
     def test_start_with_lanes_parameter(self):
         """Test that lanes parameter is converted to tiles regex"""
