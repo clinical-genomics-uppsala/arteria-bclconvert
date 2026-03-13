@@ -2,6 +2,7 @@
 
 import os
 import gzip
+import xml.etree.ElementTree as ET
 import shutil
 import logging
 import click
@@ -9,6 +10,47 @@ import time
 
 log = logging.getLogger()
 
+def get_lanes_from_runinfo(run_info_file):
+    xml_data = ET.parse(run_info_file)
+    return int(xml_data.find('.//FlowcellLayout').get('LaneCount'))
+
+def create_fastq_files(sample_id, s_index_map, sample_name, lane, project, output_directory, bcl_sampleproject_subdirectories):
+    fastq1_name = f"{sample_id}_S{s_index_map[sample_name]}_L00{lane}_R1_001.fastq.gz"
+    fastq2_name = f"{sample_id}_S{s_index_map[sample_name]}_L00{lane}_R2_001.fastq.gz"
+    if bcl_sampleproject_subdirectories:
+        fastq1_name = str(os.path.join(project, fastq1_name))
+        fastq2_name = str(os.path.join(project, fastq2_name))
+        os.makedirs(os.path.join(output_directory, project), exist_ok=True)
+    fastq1_name = str(os.path.join(output_directory, fastq1_name))
+    fastq2_name = str(os.path.join(output_directory, fastq2_name))
+    with gzip.open(fastq1_name, 'wb') as w:
+        w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+        w.write(b"ACGT\n")
+        w.write(b"+\n")
+        w.write(b"EEEE\n")
+        w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+        w.write(b"ACGT\n")
+        w.write(b"+\n")
+        w.write(b"EEEE\n")
+        w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+        w.write(b"ACGT\n")
+        w.write(b"+\n")
+        w.write(b"EEEE\n")
+    with gzip.open(fastq2_name, 'wb') as w:
+        w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+        w.write(b"ACGT\n")
+        w.write(b"+\n")
+        w.write(b"EEEE\n")
+        w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+        w.write(b"ACGT\n")
+        w.write(b"+\n")
+        w.write(b"EEEE\n")
+        w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
+        w.write(b"ACGT\n")
+        w.write(b"+\n")
+        w.write(b"EEEE\n")
+    log.debug(f"\t: {fastq1_name}")
+    log.debug(f"\t: {fastq2_name}")
 
 def parse_tiles_to_lanes(tiles):
     """Parse bcl-convert --tiles arguments into a list of lane numbers.
@@ -20,25 +62,26 @@ def parse_tiles_to_lanes(tiles):
     if not tiles:
         return None
     all_lanes = set()
+    
     for tile in tiles:
-        content = tile.strip()
-        if not content.startswith('s_'):
-            continue
-        content = content[2:]
-        if content.startswith('[') and content.endswith(']'):
-            content = content[1:-1]
-            i = 0
-            while i < len(content):
-                if i + 2 < len(content) and content[i + 1] == '-':
-                    start = int(content[i])
-                    end = int(content[i + 2])
-                    all_lanes.update(range(start, end + 1))
-                    i += 3
-                else:
-                    all_lanes.add(int(content[i]))
-                    i += 1
-        else:
-            all_lanes.add(int(content))
+        for content in tile.strip().split("+"):
+            if not content.startswith('s_'):
+                continue
+            content = content[2:]
+            if content.startswith('[') and content.endswith(']'):
+                content = content[1:-1]
+                i = 0
+                while i < len(content):
+                    if i + 2 < len(content) and content[i + 1] == '-':
+                        start = int(content[i])
+                        end = int(content[i + 2])
+                        all_lanes.update(range(start, end + 1))
+                        i += 3
+                    else:
+                        all_lanes.add(int(content[i]))
+                        i += 1
+            else:
+                all_lanes.add(int(content))
     return sorted(all_lanes) if all_lanes else None
 
 
@@ -80,7 +123,7 @@ def get_lanes_from_samplesheet(header_map, rows):
 @click.option("--bcl-num-compression-threads", required=False, type=str, default="1", help="bcl num comp threads",)
 @click.option("--bcl-num-decompression-threads", required=False, type=str, default="1", help="bcl num decomp threads",)
 #@click.option("--bcl-only-matched-reads-true", prompt="bcl only matched reads true", required=True, type=str, help="bcl only matched reads true",)
-@click.option("--tiles", required=False, default=(), type=str, multiple=True, help="tiles",)
+@click.option("--tiles", required=False, default=None, type=str, multiple=True, help="tiles",)
 @click.option("--exclude-tiles", required=False, default="", type=str, help="exclude tiles",)
 #@click.option("--no-sample-sheet", prompt="no sample sheet", required=True, type=boolean, default=False, help="no sample sheet",)
 #@click.option("--output-legacy-stats true", prompt="no sample sheet", required=True, type=boolean, default=False, help="no sample sheet",)
@@ -98,7 +141,7 @@ def bcl_convert(bcl_input_directory,
                 bcl_num_conversion_threads="1",
                 bcl_num_compression_threads="1",
                 bcl_num_decompression_threads="1",
-                tiles=(),
+                tiles=None,
                 exclude_tiles=None,
                 sample_name_column_enabled=None,
                 fastq_gzip_compression_level=None):
@@ -131,19 +174,29 @@ def bcl_convert(bcl_input_directory,
     s_index_map = {}
     time.sleep(5)
     log.debug(f"Parsing sample sheet: {sample_sheet}")
-    lanes_from_tiles_parameter = parse_tiles_to_lanes(tiles)
+    if tiles is not None:
+        lanes_from_tiles_parameter = parse_tiles_to_lanes(tiles)
+    else:
+        lanes_from_tiles_parameter = None
+    
     with open(sample_sheet, 'r') as reader:
+        data_rows = []
         for row in reader:
-            if '[data]' in row.lower():
+            if '[data]' in row.lower().strip() or '[bclconvert_data]' in row.lower().strip():
                 header_row = next(reader)
-                col = header_row.lower().split(',')
+                col = header_row.lower().rstrip().split(',')
                 for i, v in enumerate(col):
                     header_map[v] = i
-                data_rows = [r for r in reader if r.strip()]
+                for r in reader:
+                    if len(r.strip()) == 0:
+                        continue
+                    if '[cloud' in r.lower():
+                        break
+                    data_rows.append(r.strip())
                 break
 
-    lanes_from_samplesheet = get_lanes_from_samplesheet(header_map, data_rows)
-    lanes = lanes_from_tiles_parameter if lanes_from_tiles_parameter is not None else lanes_from_samplesheet
+    lanes_from_runinfo = get_lanes_from_runinfo(os.path.join(bcl_input_directory, "RunInfo.xml"))
+    lanes = lanes_from_tiles_parameter if lanes_from_tiles_parameter is not None else list(range(1, lanes_from_runinfo + 1))
 
     logs = os.path.join(output_directory, 'Logs')
     os.mkdir(logs)
@@ -165,14 +218,23 @@ def bcl_convert(bcl_input_directory,
     for row in data_rows:
         row = row.split(",")
         sample_id = row[header_map['sample_id']]
-        sample_name = row[header_map['sample_name']]
-        project = row[header_map['sample_project']]
+        if 'sample_name' in header_map:
+            sample_name = row[header_map['sample_name']]
+        else:
+            sample_name = row[header_map['sample_id']]
         if sample_name not in s_index_map:
             s_index_counter = s_index_counter + 1
             s_index_map[sample_name] = s_index_counter
+        project = None
+        if bcl_sampleproject_subdirectories:
+            if 'sample_project' in header_map:
+                project = row[header_map['sample_project']]
+            else:
+                project = row[header_map['projectname']]
         if no_lane_splitting:
             fastq1_name = f"{sample_id}_S{s_index_map[sample_name]}_R1_001.fastq.gz"
             fastq2_name = f"{sample_id}_S{s_index_map[sample_name]}_R2_001.fastq.gz"
+
             if bcl_sampleproject_subdirectories:
                 fastq1_name = str(os.path.join(project, fastq1_name))
                 fastq2_name = str(os.path.join(project, fastq2_name))
@@ -213,44 +275,10 @@ def bcl_convert(bcl_input_directory,
                 if int(row[header_map['lane']]) not in lanes:
                     continue
                 lane = row[header_map['lane']]
+                create_fastq_files(sample_id, s_index_map, sample_name, lane, project, output_directory, bcl_sampleproject_subdirectories)
             else:
-                lane = 1
-            fastq1_name = f"{sample_id}_S{s_index_map[sample_name]}_L00{lane}_R1_001.fastq.gz"
-            fastq2_name = f"{sample_id}_S{s_index_map[sample_name]}_L00{lane}_R2_001.fastq.gz"
-            if bcl_sampleproject_subdirectories:
-                fastq1_name = str(os.path.join(project, fastq1_name))
-                fastq2_name = str(os.path.join(project, fastq2_name))
-                os.makedirs(os.path.join(output_directory, project), exist_ok=True)
-            fastq1_name = str(os.path.join(output_directory, fastq1_name))
-            fastq2_name = str(os.path.join(output_directory, fastq2_name))
-            with gzip.open(fastq1_name, 'wb') as w:
-                w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
-                w.write(b"ACGT\n")
-                w.write(b"+\n")
-                w.write(b"EEEE\n")
-                w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
-                w.write(b"ACGT\n")
-                w.write(b"+\n")
-                w.write(b"EEEE\n")
-                w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
-                w.write(b"ACGT\n")
-                w.write(b"+\n")
-                w.write(b"EEEE\n")
-            with gzip.open(fastq2_name, 'wb') as w:
-                w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7282:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
-                w.write(b"ACGT\n")
-                w.write(b"+\n")
-                w.write(b"EEEE\n")
-                w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7283:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
-                w.write(b"ACGT\n")
-                w.write(b"+\n")
-                w.write(b"EEEE\n")
-                w.write(f"@NB501298:412:H7VHJBGXN:{lane}:11101:7284:1048:ATA+TTG 1:N:0:TTCGTTGG+TACACACG\n".encode('utf-8'))
-                w.write(b"ACGT\n")
-                w.write(b"+\n")
-                w.write(b"EEEE\n")
-            log.debug(f"\t: {fastq1_name}")
-            log.debug(f"\t: {fastq2_name}")
+                for lane in lanes:
+                    create_fastq_files(sample_id, s_index_map, sample_name, lane, project, output_directory, bcl_sampleproject_subdirectories)
     time.sleep(5)
     exit(0)
 
